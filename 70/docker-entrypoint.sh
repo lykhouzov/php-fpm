@@ -22,8 +22,11 @@ if [ ! -z "$MAGE_ROOT" ]; then
     echo "$LINE" >> /etc/cron.d/magento-cron
 
     if [ ! -z "$MAGE_CUSTOM_CRON" ]; then
-        echo "### Custom Cron Lines" >> /etc/cron.d/magento-cron
-        echo "$MAGE_CUSTOM_CRON" >> /etc/cron.d/magento-cron
+         IFS=':' read -r -a crons <<< "$MAGE_CUSTOM_CRON";
+        for cronexpr in "${crons[@]}"; do
+            echo "### Custom Cron Lines" >> /etc/cron.d/magento-cron
+            echo "$cronexpr" >> /etc/cron.d/magento-cron
+        done
     fi
 
     chown root:root /etc/cron.d/magento-cron
