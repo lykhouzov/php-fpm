@@ -23,7 +23,7 @@ rm -f /lib/systemd/system/anaconda.target.wants/*;
 
 COPY ./docker-entrypoint.sh /
 
-RUN yum install -y httpd crontabs which\
+RUN yum install -y httpd crontabs which \
 php54w-fpm php54w-devel php54w-ftp php54w-opcache php54w-imap php54w-mysql \
 php54w-curl php54w-gd php54w-mcrypt php54w-xmlrpc php54w-pecl-xdebug \
 php54w-xsl php54w-pear php54w-phar php54w-posix \
