@@ -28,7 +28,7 @@ php70w-fpm php70w-devel php70w-ftp php70w-opcache php70w-imap php70w-mysql \
 php70w-curl php70w-gd php70w-mcrypt php70w-xmlrpc php70w-pecl-xdebug \
 php70w-xsl php70w-pear php70w-phar php70w-posix \
 php70w-soap php70w-xmlreader php70w-xmlwriter \
-php70w-zlib php70w-zip php70w-dom php70w-mcrypt  \
+php70w-zlib php70w-zip php70w-dom php70w-mbstring  \
 ruby ruby-devel g++ make gcc gcc-c++ sqlite-devel \
 && /usr/bin/yum clean all \
 #Xdebug setup
@@ -52,11 +52,11 @@ ruby ruby-devel g++ make gcc gcc-c++ sqlite-devel \
 && sed -i 's/;php_admin_flag\[log_errors\] = on/php_admin_flag\[log_errors\] = on/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/;catch_workers_output = yes/catch_workers_output = yes/g' /etc/php-fpm.d/www.conf \
 ## Install ioncube
-&& curl -O http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
-&& tar -zxvf ioncube_loaders_lin_x86-64.tar.gz \
-&& cp ioncube/ioncube_loader_lin_5.5.so ioncube/ioncube_loader_lin_5.5_ts.so /usr/lib64/php/modules/ \
-&& rm -rf ioncube ioncube_loaders_lin_x86-64.tar.gz \
-&& echo 'zend_extension=ioncube_loader_lin_5.5.so' > /etc/php.d/ioncube.ini \
+# && curl -O http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
+# && tar -zxvf ioncube_loaders_lin_x86-64.tar.gz \
+# && cp ioncube/ioncube_loader_lin_5.5.so ioncube/ioncube_loader_lin_5.5_ts.so /usr/lib64/php/modules/ \
+# && rm -rf ioncube ioncube_loaders_lin_x86-64.tar.gz \
+# && echo 'zend_extension=ioncube_loader_lin_5.5.so' > /etc/php.d/ioncube.ini \
 # forward request and error logs to docker log collector
 && rm -f /var/log/php-fpm/www-error.log \
 && ln -sf /dev/stdout  /var/log/php-fpm/www-error.log \
