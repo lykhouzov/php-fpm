@@ -2,11 +2,8 @@ FROM centos:7
 
 MAINTAINER Aleksandr Lykhouzov <lykhouzov@gmail.com>
 
-ENV MAGE_ROOT=/var/www/html/magento
-ENV MAGE_CRON_EXPR="*/10 * * * *"
-ENV HOSTNAME=magento.loc
-ENV SERVER_LISTEN_PORT=80
-ENV TERM=xterm
+ENV MAGE_ROOT=/var/www/html/magento MAGE_CRON_EXPR="*/10 * * * *" HOSTNAME=magento.loc SERVER_LISTEN_PORT=80 TERM=xterm
+COPY ./docker-entrypoint.sh /
 RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm; \
 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm; \
 yum -y swap -- remove fakesystemd -- install systemd systemd-libs; \
@@ -19,22 +16,23 @@ rm -f /lib/systemd/system/local-fs.target.wants/*; \
 rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
 rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
 rm -f /lib/systemd/system/basic.target.wants/*;\
-rm -f /lib/systemd/system/anaconda.target.wants/*;
+rm -f /lib/systemd/system/anaconda.target.wants/*;\
 
-COPY ./docker-entrypoint.sh /
-
-RUN yum install -y httpd crontabs which \
+yum install -y crontabs which git \
 php54w-fpm php54w-devel php54w-ftp php54w-opcache php54w-imap php54w-mysql \
-php54w-curl php54w-gd php54w-mcrypt php54w-xmlrpc php54w-pecl-xdebug \
-php54w-xsl php54w-pear php54w-phar php54w-posix \
+php54w-curl php54w-gd php54w-mcrypt php54w-xmlrpc \
+php54w-xsl php54w-pear php54w-phar php54w-posix php54w-mbstring \
 php54w-soap php54w-xmlreader php54w-xmlwriter \
-php54w-zlib php54w-zip php54w-dom php54w-mcrypt  \
+php54w-zlib php54w-zip php54w-dom \
+php54w-tokenizer php54w-ctype php54w-intl \
 ruby ruby-devel g++ make gcc gcc-c++ sqlite-devel \
 && /usr/bin/yum clean all \
 #Xdebug setup
-&& curl -O http://xdebug.org/files/xdebug-2.4.0rc2.tgz \
-&& tar -zxvf xdebug-2.4.0rc2.tgz && rm -f xdebug-2.4.0rc2.tgz \
-&& cd xdebug-2.4.0RC2 \
+&& curl -O https://xdebug.org/files/xdebug-2.4.0rc4.tgz \
+&& tar -zxvf xdebug-2.4.0rc4.tgz && rm -f xdebug-2.4.0rc4.tgz \
+&& cd xdebug-2.4.0RC4 && phpize \
+&& ./configure && make && make install \
+&& echo 'extension=xdebug.so;' >>  /etc/php.d/xdebug.ini \
 && echo 'xdebug.remote_enable=1;' >>  /etc/php.d/xdebug.ini \
 && echo 'xdebug.remote_host=127.0.0.1;' >> /etc/php.d/xdebug.ini \
 && echo 'xdebug.remote_connect_back=1 # Not safe for production servers;' >> /etc/php.d/xdebug.ini\
@@ -49,7 +47,6 @@ ruby ruby-devel g++ make gcc gcc-c++ sqlite-devel \
 && sed -i 's/;php_admin_value\[error_log\] = \/var\/log\/fpm-php.www.log/php_admin_value[error_log] = \/var\/log\/php-fpm\/www-error.log/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/;php_admin_flag\[log_errors\] = on/php_admin_flag\[log_errors\] = on/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/;catch_workers_output = yes/catch_workers_output = yes/g' /etc/php-fpm.d/www.conf \
-&& sed -i 's/;php_admin_value\[sendmail_path\] = \/usr\/sbin\/sendmail -t -i -f www@my.domain.com/php_admin_value\[sendmail_path\] = \/usr\/bin\/env catchmail -f magento@local.loc/g' /etc/php-fpm.d/www.conf \
 ## Install ioncube
 && curl -O http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
 && tar -zxvf ioncube_loaders_lin_x86-64.tar.gz \
@@ -62,11 +59,14 @@ ruby ruby-devel g++ make gcc gcc-c++ sqlite-devel \
 && systemctl enable php-fpm.service \
 && chown root:root /docker-entrypoint.sh && chmod 775 /docker-entrypoint.sh \
 && curl http://files.magerun.net/n98-magerun-latest.phar -o /usr/bin/magerun \
-&& chmod +x /usr/bin/magerun\
-&&  gem install mailcatcher
+&& chmod +x /usr/bin/magerun \
+&& cd /etc/ && git clone https://github.com/phpredis/phpredis.git \
+&& cd phpredis && git checkout 2.2.7 && /usr/bin/phpize \
+&& ./configure && make && make install \
+&& echo 'extension=/etc/phpredis/modules/redis.so' > /etc/php.d/redis.ini
 
 VOLUME [ "/sys/fs/cgroup" ]
-EXPOSE 9000 1025 1080
+EXPOSE 9000 9900
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/usr/sbin/init"]
