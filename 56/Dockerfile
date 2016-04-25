@@ -32,7 +32,7 @@ ruby ruby-devel g++ make gcc gcc-c++ sqlite-devel \
 && tar -zxvf xdebug-2.4.0rc4.tgz && rm -f xdebug-2.4.0rc4.tgz \
 && cd xdebug-2.4.0RC4 && phpize \
 && ./configure && make && make install \
-&& echo 'extension=xdebug.so;' >>  /etc/php.d/xdebug.ini \
+&& echo 'zend_extension=xdebug.so;' >>  /etc/php.d/xdebug.ini \
 && echo 'xdebug.remote_enable=1;' >>  /etc/php.d/xdebug.ini \
 && echo 'xdebug.remote_host=127.0.0.1;' >> /etc/php.d/xdebug.ini \
 && echo 'xdebug.remote_connect_back=1 # Not safe for production servers;' >> /etc/php.d/xdebug.ini\
