@@ -5,7 +5,9 @@ MAINTAINER Aleksandr Lykhouzov <lykhouzov@gmail.com>
 ENV MAGE_ROOT=/var/www/html/magento MAGE_CRON_EXPR="*/10 * * * *" HOSTNAME=magento.loc SERVER_LISTEN_PORT=80 TERM=xterm
 COPY ./docker-entrypoint.sh /
 RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm; \
+rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7;\
 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm; \
+rpm --import https://mirror.webtatic.com/yum/RPM-GPG-KEY-webtatic-el7;\
 yum -y swap -- remove fakesystemd -- install systemd systemd-libs; \
 yum -y update; yum clean all; \
 (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
@@ -18,19 +20,19 @@ rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
 rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;\
 
-yum install -y crontabs which git \
+yum install -y crontabs which git yum-cron \
 php56w-fpm php56w-devel php56w-ftp php56w-opcache php56w-imap php56w-mysql \
 php56w-curl php56w-gd php56w-mcrypt php56w-xmlrpc \
 php56w-xsl php56w-pear php56w-phar php56w-posix php56w-mbstring \
 php56w-soap php56w-xmlreader php56w-xmlwriter \
 php56w-zlib php56w-zip php56w-dom \
 php56w-tokenizer php56w-ctype php56w-intl \
-ruby ruby-devel g++ make gcc gcc-c++ sqlite-devel \
+g++ make gcc gcc-c++ sqlite-devel \
 && /usr/bin/yum clean all \
 #Xdebug setup
-&& curl -O https://xdebug.org/files/xdebug-2.4.0rc4.tgz \
-&& tar -zxvf xdebug-2.4.0rc4.tgz && rm -f xdebug-2.4.0rc4.tgz \
-&& cd xdebug-2.4.0RC4 && phpize \
+&& curl -O https://xdebug.org/files/xdebug-2.4.1.tgz \
+&& tar -zxvf xdebug-2.4.1.tgz && rm -f xdebug-2.4.1.tgz \
+&& cd xdebug-2.4.1 && phpize \
 && ./configure && make && make install \
 && echo 'zend_extension=xdebug.so;' >>  /etc/php.d/xdebug.ini \
 && echo 'xdebug.remote_enable=1;' >>  /etc/php.d/xdebug.ini \
@@ -41,12 +43,15 @@ ruby ruby-devel g++ make gcc gcc-c++ sqlite-devel \
 && echo 'xdebug.remote_mode=req;' >> /etc/php.d/xdebug.ini\
 && echo 'xdebug.remote_autostart=0;' >> /etc/php.d/xdebug.ini\
 #&& rm -f /etc/php-fpm.d/www.conf \
+&& sed -i 's/memory_limit = 128M/memory_limit = 512M/g' /etc/php.ini \
 && sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/listen.allowed_clients = 127.0.0.1/;listen.allowed_clients = 127.0.0.1/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/;php_flag\[display_errors\] = off/php_flag\[display_errors\] = on/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/;php_admin_value\[error_log\] = \/var\/log\/fpm-php.www.log/php_admin_value[error_log] = \/var\/log\/php-fpm\/www-error.log/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/;php_admin_flag\[log_errors\] = on/php_admin_flag\[log_errors\] = on/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/;catch_workers_output = yes/catch_workers_output = yes/g' /etc/php-fpm.d/www.conf \
+## yum-cron
+&& sed -i 's/;apply_updates = no/apply_updates = yes/g' /etc/yum/yum-cron.conf \
 ## Install ioncube
 && curl -O http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
 && tar -zxvf ioncube_loaders_lin_x86-64.tar.gz \
@@ -61,9 +66,10 @@ ruby ruby-devel g++ make gcc gcc-c++ sqlite-devel \
 && curl http://files.magerun.net/n98-magerun-latest.phar -o /usr/bin/magerun \
 && chmod +x /usr/bin/magerun \
 && cd /etc/ && git clone https://github.com/phpredis/phpredis.git \
-&& cd phpredis && git checkout 2.2.7 && /usr/bin/phpize \
+&& cd phpredis && git checkout 2.2.8 && /usr/bin/phpize \
 && ./configure && make && make install \
-&& echo 'extension=/etc/phpredis/modules/redis.so' > /etc/php.d/redis.ini
+&& echo 'extension=/etc/phpredis/modules/redis.so' > /etc/php.d/redis.ini \
+&& cd /  rm -rf
 
 VOLUME [ "/sys/fs/cgroup" ]
 EXPOSE 9000 9900
