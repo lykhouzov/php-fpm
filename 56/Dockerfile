@@ -68,7 +68,7 @@ g++ make gcc gcc-c++ sqlite-devel \
 && cd /etc/ && git clone https://github.com/phpredis/phpredis.git \
 && cd phpredis && git checkout 2.2.8 && /usr/bin/phpize \
 && ./configure && make && make install \
-&& echo 'extension=/etc/phpredis/modules/redis.so' > /etc/php.d/redis.ini \
+&& echo 'extension=redis.so' > /etc/php.d/redis.ini \
 && cd / && rm -rf /etc/phpredis \
 ### logroatet repo
 && echo $'compress\n\
