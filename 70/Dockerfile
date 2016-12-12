@@ -20,7 +20,7 @@ rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
 rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;\
 
-yum install -y crontabs which git yum-cron logrotate \
+yum install -y crontabs which git yum-cron logrotate rsyslog \
 php70w-fpm php70w-devel php70w-ftp php70w-opcache php70w-imap php70w-mysql \
 php70w-curl php70w-gd php70w-mcrypt php70w-xmlrpc \
 php70w-xsl php70w-pear php70w-phar php70w-posix php70w-mbstring \
@@ -71,7 +71,7 @@ g++ make gcc gcc-c++ sqlite-devel \
 && cp /etc/phpredis/modules/redis.so /usr/lib64/php/modules/ \
 && echo 'extension=redis.so' > /etc/php.d/redis.ini \
 && cd / && rm -rf /etc/phpredis \
-### logroatet repo
+### logrotate repo
 && echo $'compress\n\
 "/var/www/html/magento/var/log/*.log"{\n\
     rotate 15\n\

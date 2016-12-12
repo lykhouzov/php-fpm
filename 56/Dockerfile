@@ -20,7 +20,7 @@ rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
 rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;\
 
-yum install -y crontabs which git yum-cron logrotate \
+yum install -y crontabs which git yum-cron logrotate rsyslog \
 php56w-fpm php56w-devel php56w-ftp php56w-opcache php56w-imap php56w-mysql \
 php56w-curl php56w-gd php56w-mcrypt php56w-xmlrpc \
 php56w-xsl php56w-pear php56w-phar php56w-posix php56w-mbstring \
@@ -70,7 +70,7 @@ g++ make gcc gcc-c++ sqlite-devel \
 && ./configure && make && make install \
 && echo 'extension=redis.so' > /etc/php.d/redis.ini \
 && cd / && rm -rf /etc/phpredis \
-### logroatet repo
+### logrotate repo
 && echo $'compress\n\
 "/var/www/html/magento/var/log/*.log"{\n\
     rotate 15\n\
