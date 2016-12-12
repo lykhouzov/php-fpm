@@ -20,7 +20,7 @@ rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
 rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;\
 
-yum install -y crontabs which git yum-cron \
+yum install -y crontabs which git yum-cron logrotate \
 php56w-fpm php56w-devel php56w-ftp php56w-opcache php56w-imap php56w-mysql \
 php56w-curl php56w-gd php56w-mcrypt php56w-xmlrpc \
 php56w-xsl php56w-pear php56w-phar php56w-posix php56w-mbstring \
@@ -69,7 +69,19 @@ g++ make gcc gcc-c++ sqlite-devel \
 && cd phpredis && git checkout 2.2.8 && /usr/bin/phpize \
 && ./configure && make && make install \
 && echo 'extension=/etc/phpredis/modules/redis.so' > /etc/php.d/redis.ini \
-&& cd /  rm -rf
+&& cd / && rm -rf /etc/phpredis \
+### logroatet repo
+&& echo $'compress\n\
+"/var/www/html/magento/var/log/*.log"{\n\
+    rotate 15\n\
+    size 5M\n\
+    daily\n\
+    missingok\n\
+    notifempty\n\
+    sharedscripts\n\
+    olddir archive/\n\
+}\n\
+' | tee /etc/logrotate.d/magento
 
 VOLUME [ "/sys/fs/cgroup" ]
 EXPOSE 9000 9900
