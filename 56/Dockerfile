@@ -42,14 +42,15 @@ g++ make gcc gcc-c++ sqlite-devel \
 && echo 'xdebug.remote_handler=dbgp;' >> /etc/php.d/xdebug.ini\
 && echo 'xdebug.remote_mode=req;' >> /etc/php.d/xdebug.ini\
 && echo 'xdebug.remote_autostart=0;' >> /etc/php.d/xdebug.ini\
-#&& rm -f /etc/php-fpm.d/www.conf \
+&& cd .. && rm -rf xdebug-2.4.1 \
 && sed -i 's/memory_limit = 128M/memory_limit = 512M/g' /etc/php.ini \
+&& sed -i 's/;error_log = syslog/error_log = syslog/g' /etc/php.ini \
+&& sed -i 's/error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT/error_reporting = E_ALL/g' /etc/php.ini \
+&& sed -i 's/display_errors = Off/display_errors = On/g' /etc/php.ini \
+&& sed -i 's/;mail.log = syslog/mail.log = syslog/g' /etc/php.ini \
 && sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/listen.allowed_clients = 127.0.0.1/;listen.allowed_clients = 127.0.0.1/g' /etc/php-fpm.d/www.conf \
-&& sed -i 's/;php_flag\[display_errors\] = off/php_flag\[display_errors\] = on/g' /etc/php-fpm.d/www.conf \
-&& sed -i 's/;php_admin_value\[error_log\] = \/var\/log\/fpm-php.www.log/php_admin_value[error_log] = \/var\/log\/php-fpm\/www-error.log/g' /etc/php-fpm.d/www.conf \
-&& sed -i 's/;php_admin_flag\[log_errors\] = on/php_admin_flag\[log_errors\] = on/g' /etc/php-fpm.d/www.conf \
-&& sed -i 's/;catch_workers_output = yes/catch_workers_output = yes/g' /etc/php-fpm.d/www.conf \
+# && sed -i 's/;catch_workers_output = yes/catch_workers_output = yes/g' /etc/php-fpm.d/www.conf \
 ## yum-cron
 && sed -i 's/;apply_updates = no/apply_updates = yes/g' /etc/yum/yum-cron.conf \
 ## Install ioncube
@@ -59,8 +60,6 @@ g++ make gcc gcc-c++ sqlite-devel \
 && rm -rf ioncube ioncube_loaders_lin_x86-64.tar.gz \
 && echo 'zend_extension=ioncube_loader_lin_5.6.so' > /etc/php.d/ioncube.ini \
 # forward request and error logs to docker log collector
-&& rm -f /var/log/php-fpm/www-error.log \
-&& ln -sf /dev/stdout  /var/log/php-fpm/www-error.log \
 && systemctl enable php-fpm.service \
 && chown root:root /docker-entrypoint.sh && chmod 775 /docker-entrypoint.sh \
 && curl http://files.magerun.net/n98-magerun-latest.phar -o /usr/bin/magerun \
