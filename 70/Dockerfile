@@ -30,9 +30,9 @@ php70w-tokenizer php70w-ctype php70w-intl \
 g++ make gcc gcc-c++ sqlite-devel \
 && /usr/bin/yum clean all \
 #Xdebug setup
-&& curl -O https://xdebug.org/files/xdebug-2.4.1.tgz \
-&& tar -zxvf xdebug-2.4.1.tgz && rm -f xdebug-2.4.1.tgz \
-&& cd xdebug-2.4.1 && phpize \
+&& curl -O https://xdebug.org/files/xdebug-2.5.0.tgz \
+&& tar -zxvf xdebug-2.5.0.tgz && rm -f xdebug-2.5.0.tgz \
+&& cd xdebug-2.5.0 && phpize \
 && ./configure && make && make install \
 && echo 'zend_extension=xdebug.so;' >>  /etc/php.d/xdebug.ini \
 && echo 'xdebug.remote_enable=1;' >>  /etc/php.d/xdebug.ini \
@@ -42,7 +42,7 @@ g++ make gcc gcc-c++ sqlite-devel \
 && echo 'xdebug.remote_handler=dbgp;' >> /etc/php.d/xdebug.ini\
 && echo 'xdebug.remote_mode=req;' >> /etc/php.d/xdebug.ini\
 && echo 'xdebug.remote_autostart=0;' >> /etc/php.d/xdebug.ini\
-&& cd ../ && rm -rf  xdebug-2.4.1 \
+&& cd ../ && rm -rf  xdebug-2.5.0 \
 #&& rm -f /etc/php-fpm.d/www.conf \
 && sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/listen.allowed_clients = 127.0.0.1/;listen.allowed_clients = 127.0.0.1/g' /etc/php-fpm.d/www.conf \

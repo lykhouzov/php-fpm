@@ -21,12 +21,12 @@ rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;\
 
 yum install -y crontabs which git yum-cron logrotate rsyslog \
-php56w-fpm php56w-devel php56w-ftp php56w-opcache php56w-imap php56w-mysql \
-php56w-curl php56w-gd php56w-mcrypt php56w-xmlrpc \
-php56w-xsl php56w-pear php56w-phar php56w-posix php56w-mbstring \
-php56w-soap php56w-xmlreader php56w-xmlwriter \
-php56w-zlib php56w-zip php56w-dom \
-php56w-tokenizer php56w-ctype php56w-intl \
+php71w-fpm php71w-devel php71w-ftp php71w-opcache php71w-imap php71w-mysql \
+php71w-curl php71w-gd php71w-mcrypt php71w-xmlrpc \
+php71w-xsl php71w-pear php71w-phar php71w-posix php71w-mbstring \
+php71w-soap php71w-xmlreader php71w-xmlwriter \
+php71w-zlib php71w-zip php71w-dom \
+php71w-tokenizer php71w-ctype php71w-intl \
 g++ make gcc gcc-c++ sqlite-devel \
 && /usr/bin/yum clean all \
 #Xdebug setup
@@ -43,30 +43,32 @@ g++ make gcc gcc-c++ sqlite-devel \
 && echo 'xdebug.remote_mode=req;' >> /etc/php.d/xdebug.ini\
 && echo 'xdebug.remote_autostart=0;' >> /etc/php.d/xdebug.ini\
 && cd ../ && rm -rf  xdebug-2.5.0 \
-&& sed -i 's/memory_limit = 128M/memory_limit = 512M/g' /etc/php.ini \
-&& sed -i 's/;error_log = syslog/error_log = syslog/g' /etc/php.ini \
-&& sed -i 's/error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT/error_reporting = E_ALL/g' /etc/php.ini \
-&& sed -i 's/display_errors = Off/display_errors = On/g' /etc/php.ini \
-&& sed -i 's/;mail.log = syslog/mail.log = syslog/g' /etc/php.ini \
+#&& rm -f /etc/php-fpm.d/www.conf \
 && sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /etc/php-fpm.d/www.conf \
 && sed -i 's/listen.allowed_clients = 127.0.0.1/;listen.allowed_clients = 127.0.0.1/g' /etc/php-fpm.d/www.conf \
-# && sed -i 's/;catch_workers_output = yes/catch_workers_output = yes/g' /etc/php-fpm.d/www.conf \
+&& sed -i 's/;php_flag\[display_errors\] = off/php_flag\[display_errors\] = on/g' /etc/php-fpm.d/www.conf \
+&& sed -i 's/;php_admin_value\[error_log\] = \/var\/log\/fpm-php.www.log/php_admin_value[error_log] = \/var\/log\/php-fpm\/www-error.log/g' /etc/php-fpm.d/www.conf \
+&& sed -i 's/;php_admin_flag\[log_errors\] = on/php_admin_flag\[log_errors\] = on/g' /etc/php-fpm.d/www.conf \
+&& sed -i 's/;catch_workers_output = yes/catch_workers_output = yes/g' /etc/php-fpm.d/www.conf \
 ## yum-cron
 && sed -i 's/;apply_updates = no/apply_updates = yes/g' /etc/yum/yum-cron.conf \
-## Install ioncube
+# Install ioncube
 && curl -O http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
 && tar -zxvf ioncube_loaders_lin_x86-64.tar.gz \
-&& cp ioncube/ioncube_loader_lin_5.6.so ioncube/ioncube_loader_lin_5.6_ts.so /usr/lib64/php/modules/ \
+&& cp ioncube/ioncube_loader_lin_7.0.so ioncube/ioncube_loader_lin_7.0_ts.so /usr/lib64/php/modules/ \
 && rm -rf ioncube ioncube_loaders_lin_x86-64.tar.gz \
-&& echo 'zend_extension=ioncube_loader_lin_5.6.so' > /etc/php.d/ioncube.ini \
+&& echo 'zend_extension=ioncube_loader_lin_7.0.so' > /etc/php.d/ioncube.ini \
 # forward request and error logs to docker log collector
+&& rm -f /var/log/php-fpm/www-error.log \
+&& ln -sf /dev/stdout  /var/log/php-fpm/www-error.log \
 && systemctl enable php-fpm.service \
 && chown root:root /docker-entrypoint.sh && chmod 775 /docker-entrypoint.sh \
 && curl http://files.magerun.net/n98-magerun-latest.phar -o /usr/bin/magerun \
 && chmod +x /usr/bin/magerun \
-&& cd /etc/ && git clone https://github.com/phpredis/phpredis.git \
-&& cd phpredis && git checkout 2.2.8 && /usr/bin/phpize \
+&& cd /etc/ && git clone -b php7 https://github.com/phpredis/phpredis.git \
+&& cd phpredis && /usr/bin/phpize \
 && ./configure && make && make install \
+&& cp /etc/phpredis/modules/redis.so /usr/lib64/php/modules/ \
 && echo 'extension=redis.so' > /etc/php.d/redis.ini \
 && cd / && rm -rf /etc/phpredis \
 ### logrotate repo
